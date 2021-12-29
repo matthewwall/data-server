@@ -1,0 +1,51 @@
+#!/bin/sh
+
+### BEGIN INIT INFO
+# Provides:          influxdb
+# Required-Start:    $local_fs $remote_fs $syslog $time
+# Required-Stop:     $local_fs $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: influxdb
+# Description:       Manage the influx server
+### END INIT INFO
+
+INFLUXDB_BIN=/opt/influxdb/influxd
+INFLUXDB_CFG=/etc/influxdb/influxdb.conf
+INFLUXDB_USER=influxdb
+PIDFILE=/var/log/influxdb/influxdb.pid
+LOGFILE=/var/log/influxdb/influxdb.log
+
+# Read configuration variable file if it is present
+[ -r /etc/default/influxdb ] && . /etc/default/influxdb
+
+case "$1" in
+    "start")
+	echo "Starting influxdb..."
+	su ${INFLUXDB_USER} -c "${INFLUXDB_BIN} run -config ${INFLUXDB_CFG} -pidfile ${PIDFILE} >> ${LOGFILE} 2>&1 &"
+	echo "done"
+	;;
+
+    "stop")
+	echo "Stopping influxdb..."
+	if [ -f ${PIDFILE} ]; then
+	    kill `cat ${PIDFILE}`
+	    rm ${PIDFILE}
+	    echo "done"
+	else
+	    echo "not running?"
+	fi
+	;;
+
+    "restart")
+	echo "Restarting influxdb..."
+	$0 stop
+	sleep 2
+	$0 start
+	;;
+
+    *)
+	echo "$0 [start|stop|restart]"
+	;;
+
+esac

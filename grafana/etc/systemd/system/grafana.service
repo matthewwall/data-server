@@ -1,0 +1,16 @@
+[Unit]
+After=network-online.target
+
+[Service]
+User=grafana
+Group=grafana
+LimitNOFILE=65536
+EnvironmentFile=-/etc/default/grafana
+ExecStart=/opt/grafana/bin/grafana-server -homepath /opt/grafana -config /etc/grafana/grafana.ini $GRAFANA_OPTS
+KillMode=control-group
+Restart=on-failure
+# temporary for migration
+TimeoutStartSec=30m
+
+[Install]
+WantedBy=multi-user.target
